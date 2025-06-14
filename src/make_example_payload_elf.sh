@@ -1,0 +1,26 @@
+#!/bin/sh
+
+TEST_DIR=/tmp/loadertests
+TEST_SRC=${TEST_DIR}/test.c
+CFLAGS="-Wall -Wextra ${M32+-m32}"
+
+set -eu
+
+trap 'rm -rf $TEST_DIR' EXIT
+
+PATH=.:$PATH
+
+mkdir -p $TEST_DIR
+
+cat > $TEST_SRC << EOF
+#include <stdio.h>
+
+int main()
+{
+    printf("Hello %s!\n", "world");
+    return 0;
+}
+EOF
+
+cc $CFLAGS "$TEST_SRC" -o payload.elf
+

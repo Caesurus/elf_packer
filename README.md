@@ -4,6 +4,8 @@ A small elf loader. It can load static and dynamically linked ELF EXEC and DYN (
 
 If the loader needs to load a dynamically linked ELF it places an interpreter (usually ld.so) and a requested binary into a memory and then calls the interpreter entry point.
 
+This branch adds the aes implementation from: [tiny-AES-c](https://github.com/kokke/tiny-AES-c/)
+
 
 ## Build
 
@@ -11,7 +13,7 @@ Default build is for amd64:
 
 ```
 $ make
-``` 
+```
 
 Build for i386:
 
@@ -29,7 +31,7 @@ $ make SMALL=1
 
 Run basic hello world test:
 ```
-$ ./test.sh 
+$ ./test.sh
 default        : PASS
 static         : PASS
 pie            : PASS
