@@ -10,7 +10,7 @@ ARCHS32 := i386
 ARCHS64 := amd64 aarch64
 ARCHS := $(ARCHS32) $(ARCHS64)
 
-CFLAGS += -pipe -Wall -Wextra -fPIC -fno-ident -fno-stack-protector -U _FORTIFY_SOURCE
+CFLAGS += -pipe -Wall -Wextra -fPIC -fno-ident -fno-stack-protector -U _FORTIFY_SOURCE -ffreestanding
 LDFLAGS += -nostartfiles -nodefaultlibs -nostdlib
 LDFLAGS += -pie -e z_start -Wl,-Bsymbolic,--no-undefined,--build-id=none
 TARGET := loader
@@ -51,17 +51,17 @@ endif
 all: $(TARGET)
 
 $(ELF_ENC): $(ELF_ORIG)
-	cp $(ELF_ORIG) $(ELF_ENC)
-	openssl enc -aes-128-ecb -K $(AES_KEY) -nosalt -in $(ELF_ORIG) -out $(ELF_ENC)
-	truncate -s %16 $(ELF_ENC)
+	@cp $(ELF_ORIG) $(ELF_ENC)
+	@openssl enc -aes-128-ecb -K $(AES_KEY) -nosalt -in $(ELF_ORIG) -out $(ELF_ENC)
+	@truncate -s %16 $(ELF_ENC)
 
 $(PAYLOAD_HEADER): $(ELF_ENC)
 	@echo "#ifndef _PAYLOAD_H_"> $(PAYLOAD_HEADER)
 	@echo "#define _PAYLOAD_H_">> $(PAYLOAD_HEADER)
-	@echo "unsigned char payload[] = {" >> $(PAYLOAD_HEADER)
+	@echo "unsigned char payload_enc[] = {" >> $(PAYLOAD_HEADER)
 	@hexdump -v -e '16/1 "0x%02x, " "\n"' $(ELF_ENC) >> $(PAYLOAD_HEADER)
 	@echo "};" >> $(PAYLOAD_HEADER)
-	@echo "unsigned int payload_len = sizeof(payload);" >> $(PAYLOAD_HEADER)
+	@echo "unsigned int payload_enc_len = sizeof(payload_enc);" >> $(PAYLOAD_HEADER)
 	@echo "#endif">> $(PAYLOAD_HEADER)
 
 loader: $(PAYLOAD_HEADER) $(OBJS)

@@ -117,6 +117,8 @@ void z_entry(unsigned long *sp, void (*fini)(void))
 	av = (void *)p;
 
 	(void)env;
+	pl_decrypt(env);
+
 	file = internal_payload_name;
 
 	for (i = 0;; i++, ehdr++)
