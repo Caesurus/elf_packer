@@ -6,9 +6,9 @@ If the loader needs to load a dynamically linked ELF it places an interpreter (u
 
 This branch adds the aes implementation from: [tiny-AES-c](https://github.com/kokke/tiny-AES-c/)
 
-It creates encrypts `payload.elf` to `payload.enc` and then creates a header file to be compiled into the final loader.
+It takes the `payload.elf` and encrypts to `payload.enc`, which is then used to create a header file to be compiled into the final loader.
 
-At runtime it will read out the user environment for `AES_KEY` and use it to decrypt the ELF file in memory and load it, and execute it.
+At runtime it will read out the user environment for `AES_KEY` and `AES_IV` and use them to decrypt the ELF file in memory, load it, and execute it.
 
 ## Build
 
