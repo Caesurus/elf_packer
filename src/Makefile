@@ -1,6 +1,7 @@
 ELF_ORIG=payload.elf
 ELF_ENC=payload.enc
 PAYLOAD_HEADER=payload.h
+AES_IV=aa55aa55aa55aa55aa55aa55aa55aa55
 AES_KEY=00112233445566778899aabbccddeeff
 
 # make ARCH=i386 SMALL=1 DEBUG=1
@@ -51,17 +52,13 @@ endif
 all: $(TARGET)
 
 $(ELF_ENC): $(ELF_ORIG)
-	@cp $(ELF_ORIG) $(ELF_ENC)
-	@openssl enc -aes-128-ecb -K $(AES_KEY) -nosalt -in $(ELF_ORIG) -out $(ELF_ENC)
+	@openssl enc -aes-128-cbc -K $(AES_KEY) -iv $(AES_IV) -nosalt -in $(ELF_ORIG) -out $(ELF_ENC)
 	@truncate -s %16 $(ELF_ENC)
 
 $(PAYLOAD_HEADER): $(ELF_ENC)
 	@echo "#ifndef _PAYLOAD_H_"> $(PAYLOAD_HEADER)
 	@echo "#define _PAYLOAD_H_">> $(PAYLOAD_HEADER)
-	@echo "unsigned char payload_enc[] = {" >> $(PAYLOAD_HEADER)
-	@hexdump -v -e '16/1 "0x%02x, " "\n"' $(ELF_ENC) >> $(PAYLOAD_HEADER)
-	@echo "};" >> $(PAYLOAD_HEADER)
-	@echo "unsigned int payload_enc_len = sizeof(payload_enc);" >> $(PAYLOAD_HEADER)
+	@xxd -i $(ELF_ENC) >> $(PAYLOAD_HEADER)
 	@echo "#endif">> $(PAYLOAD_HEADER)
 
 loader: $(PAYLOAD_HEADER) $(OBJS)

@@ -17,7 +17,7 @@ Default build is for amd64:
 ```
 $ ./make_example_payload_elf.sh
 $ make
-$ AES_KEY=00112233445566778899aabbccddeeff ./loader
+$ AES_IV=aa55aa55aa55aa55aa55aa55aa55aa55 AES_KEY=00112233445566778899aabbccddeeff ./loader
 ```
 
 Build for i386:
@@ -25,7 +25,7 @@ Build for i386:
 ```
 $ M32=1 ./make_example_payload_elf.sh
 $ make ARCH=i386
-$ AES_KEY=00112233445566778899aabbccddeeff ./loader
+$ AES_IV=aa55aa55aa55aa55aa55aa55aa55aa55 AES_KEY=00112233445566778899aabbccddeeff ./loader
 ```
 
 Small build (exclude all messages and printf):
