@@ -1,8 +1,8 @@
 ELF_ORIG=payload.elf
 ELF_ENC=payload.enc
 PAYLOAD_HEADER=payload.h
-AES_IV=aa55aa55aa55aa55aa55aa55aa55aa55
 AES_KEY=00112233445566778899aabbccddeeff
+IV_BIN := iv.bin
 
 # make ARCH=i386 SMALL=1 DEBUG=1
 ARCH ?= amd64
@@ -47,23 +47,28 @@ ifdef SMALL
   CFLAGS += -DZ_SMALL
 endif
 
-.PHONY: clean all $(ELF_ENC) $(PAYLOAD_HEADER)
+.PHONY: clean all $(ELF_ENC) $(PAYLOAD_HEADER) $(IV_BIN)
 
 all: $(TARGET)
 
-$(ELF_ENC): $(ELF_ORIG)
-	@openssl enc -aes-128-cbc -K $(AES_KEY) -iv $(AES_IV) -nosalt -in $(ELF_ORIG) -out $(ELF_ENC)
+$(IV_BIN):
+	@head -c 16 /dev/urandom > $(IV_BIN)
+
+$(ELF_ENC): $(ELF_ORIG) $(IV_BIN)
+	openssl enc -aes-128-cbc -K $(AES_KEY) -iv $(shell xxd -p $(IV_BIN)) -nosalt -in $(ELF_ORIG) -out $(ELF_ENC)
 	@truncate -s %16 $(ELF_ENC)
 
 $(PAYLOAD_HEADER): $(ELF_ENC)
 	@echo "#ifndef _PAYLOAD_H_"> $(PAYLOAD_HEADER)
 	@echo "#define _PAYLOAD_H_">> $(PAYLOAD_HEADER)
 	@xxd -i $(ELF_ENC) >> $(PAYLOAD_HEADER)
+	@xxd -i $(IV_BIN) >> $(PAYLOAD_HEADER)
 	@echo "#endif">> $(PAYLOAD_HEADER)
 
 loader: $(PAYLOAD_HEADER) $(OBJS)
+	$(CC) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) -o $(TARGET) $(OBJS) $(LDLIBS)
 
 clean:
-	rm -rf *.o $(TARGET) */*.o $(ELF_ENC)
+	rm -rf *.o $(TARGET) */*.o $(ELF_ENC) $(IV_BIN)
 	@echo "#error generate file" > $(PAYLOAD_HEADER)
 

@@ -16,30 +16,23 @@ void pl_decrypt(char **env)
 		return;
 
 	const char *key_hex = z_getenv_from(env, "AES_KEY");
-	const char *iv_hex = z_getenv_from(env, "AES_IV");
+	if (!key_hex)
+		z_errx(1, "AES_KEY must be set");
 
-	if (!key_hex || !iv_hex)
-		z_errx(1, "AES_KEY and AES_IV must be set");
+	if (z_strlen(key_hex) != 32)
+		z_errx(1, "AES_KEY must be 32 hex characters");
 
-	if (z_strlen(key_hex) != 32 || z_strlen(iv_hex) != 32)
-		z_errx(1, "AES_KEY and AES_IV must be 32 hex characters each");
-
-	unsigned char key[16], iv[16];
-	for (int i = 0; i < 16; i++)
-	{
+	unsigned char key[16];
+	for (int i = 0; i < 16; i++) {
 		char byte_k[3] = {key_hex[i * 2], key_hex[i * 2 + 1], 0};
-		char byte_iv[3] = {iv_hex[i * 2], iv_hex[i * 2 + 1], 0};
 		key[i] = (unsigned char)z_strtoul(byte_k, NULL, 16);
-		iv[i] = (unsigned char)z_strtoul(byte_iv, NULL, 16);
 	}
 
 	z_memcpy(decrypted_payload, payload_enc, payload_enc_len);
 
 	struct AES_ctx ctx;
-	AES_init_ctx_iv(&ctx, key, iv);
-
-	for (size_t i = 0; i + 16 <= payload_enc_len; i += 16)
-		AES_CBC_decrypt_buffer(&ctx, decrypted_payload + i, 16);
+	AES_init_ctx_iv(&ctx, key, iv_bin);
+	AES_CBC_decrypt_buffer(&ctx, decrypted_payload, payload_enc_len);
 
 	payload_decrypted = 1;
 }

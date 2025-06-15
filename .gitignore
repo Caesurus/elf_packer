@@ -1,5 +1,6 @@
 src/**/*.o
 src/loader
-src/payload.elf
-src/payload.enc
+src/*.elf
+src/*.enc
 src/.gdb_history
+src/*.bin
