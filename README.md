@@ -6,9 +6,11 @@ If the loader needs to load a dynamically linked ELF it places an interpreter (u
 
 This branch adds the aes implementation from: [tiny-AES-c](https://github.com/kokke/tiny-AES-c/)
 
-It takes the `payload.elf` and encrypts to `payload.enc`, which is then used to create a header file to be compiled into the final loader.
+The IV will be generated on each build, so no two binaries will have the same IV.
 
-At runtime it will read out the user environment for `AES_KEY` and `AES_IV` and use them to decrypt the ELF file in memory, load it, and execute it.
+The `payload.elf` is encrypted and output to `payload.enc`, which is then used to create a header file to be compiled into the final loader.
+
+At runtime it will read out the user environment for `AES_KEY` and decrypt the ELF file in memory, load it, and execute it.
 
 ## Build
 
@@ -17,7 +19,7 @@ Default build is for amd64:
 ```
 $ ./make_example_payload_elf.sh
 $ make
-$ AES_IV=aa55aa55aa55aa55aa55aa55aa55aa55 AES_KEY=00112233445566778899aabbccddeeff ./loader
+$ AES_KEY=00112233445566778899aabbccddeeff ./loader
 ```
 
 Build for i386:
@@ -25,7 +27,7 @@ Build for i386:
 ```
 $ M32=1 ./make_example_payload_elf.sh
 $ make ARCH=i386
-$ AES_IV=aa55aa55aa55aa55aa55aa55aa55aa55 AES_KEY=00112233445566778899aabbccddeeff ./loader
+$ AES_KEY=00112233445566778899aabbccddeeff ./loader
 ```
 
 Small build (exclude all messages and printf):
