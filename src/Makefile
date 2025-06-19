@@ -7,7 +7,7 @@ IV_BIN := iv.bin
 # make ARCH=i386 SMALL=1 DEBUG=1
 ARCH ?= amd64
 
-ARCHS32 := i386
+ARCHS32 := i386 arm
 ARCHS64 := amd64 aarch64
 ARCHS := $(ARCHS32) $(ARCHS64)
 
@@ -26,10 +26,14 @@ ifeq "$(filter $(ARCH),$(ARCHS))" ""
   $(error ARCH='$(ARCH)' is not supported)
 endif
 
-ifeq "$(filter $(ARCH),$(ARCHS32))" "$(ARCH)"
-  CFLAGS += -m32 -DELFCLASS=ELFCLASS32
+ifeq ($(ARCH),i386)
+  CFLAGS += -m32
   ASFLAGS += -m32
   LDFLAGS += -m32
+endif
+
+ifeq "$(filter $(ARCH),$(ARCHS32))" "$(ARCH)"
+  CFLAGS += -DELFCLASS=ELFCLASS32
 else
   CFLAGS += -DELFCLASS=ELFCLASS64
 endif
@@ -38,10 +42,10 @@ ifdef DEBUG
   CFLAGS += -O0 -g
   ASFLAGS += -g
 else
-  CFLAGS += -fvisibility=hidden
-  # Disable unwind info to make prog smaller.
-  CFLAGS += -Os -fno-asynchronous-unwind-tables -fno-unwind-tables
-  LDFLAGS += -s
+# Disable unwind info to make prog smaller.
+  CFLAGS += -fvisibility=hidden -fno-asynchronous-unwind-tables -fno-unwind-tables
+  #CFLAGS += -Os
+  #LDFLAGS += -s
 endif
 
 OBJS := $(patsubst %.c,%.o, $(wildcard *.c))
