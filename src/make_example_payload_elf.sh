@@ -2,7 +2,8 @@
 
 TEST_DIR=/tmp/loadertests
 TEST_SRC=${TEST_DIR}/test.c
-CFLAGS="-Wall -Wextra ${M32+-m32}"
+CFLAGS="-Wall -Wextra ${M32+-m32} -static "
+CC=${GCC:-${CC:-gcc}}
 
 set -eu
 
@@ -22,5 +23,5 @@ int main()
 }
 EOF
 
-cc $CFLAGS "$TEST_SRC" -o payload.elf
+$CC $CFLAGS "$TEST_SRC" -o payload.elf
 
