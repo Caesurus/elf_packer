@@ -7,7 +7,7 @@ IV_BIN := iv.bin
 # make ARCH=i386 SMALL=1 DEBUG=1
 ARCH ?= amd64
 
-ARCHS32 := i386 arm mips
+ARCHS32 := i386 arm mips ppc
 ARCHS64 := amd64 aarch64
 ARCHS := $(ARCHS32) $(ARCHS64)
 
