@@ -1,0 +1,7 @@
+src/**/*.o
+src/loader
+src/*.elf
+src/*.enc
+src/.gdb_history
+src/*.bin
+src/payload.h 

@@ -12,7 +12,7 @@ static void kprintn(int, unsigned long, int);
 static void kdoprnt(int, const char *, va_list);
 static void z_flushbuf(void);
 
-static void putcharfd(int, int );
+static void putcharfd(int, int);
 
 static void
 putcharfd(int c, int fd)
@@ -20,13 +20,15 @@ putcharfd(int c, int fd)
 	char b = c;
 	int len;
 
-	if (fd != lastfd) {
+	if (fd != lastfd)
+	{
 		z_flushbuf();
 		lastfd = fd;
 	}
 	*outptr++ = b;
 	len = outptr - outbuf;
-	if ((len >= OUTBUFSIZE) || (b == '\n') || (b == '\r')) {
+	if ((len >= OUTBUFSIZE) || (b == '\n') || (b == '\r'))
+	{
 		z_flushbuf();
 	}
 }
@@ -35,15 +37,15 @@ static void
 z_flushbuf()
 {
 	int len = outptr - outbuf;
-	if (len != 0) {
+	if (len != 0)
+	{
 		if (lastfd != -1)
 			z_write(lastfd, outbuf, len);
 		outptr = outbuf;
 	}
 }
 
-void
-z_printf(const char *fmt, ...)
+void z_printf(const char *fmt, ...)
 {
 	va_list ap;
 
@@ -52,14 +54,12 @@ z_printf(const char *fmt, ...)
 	va_end(ap);
 }
 
-void
-z_vprintf(const char *fmt, va_list ap)
+void z_vprintf(const char *fmt, va_list ap)
 {
 	kdoprnt(2, fmt, ap);
 }
 
-void
-z_fdprintf(int fd, const char *fmt, ...)
+void z_fdprintf(int fd, const char *fmt, ...)
 {
 	va_list ap;
 
@@ -68,8 +68,7 @@ z_fdprintf(int fd, const char *fmt, ...)
 	va_end(ap);
 }
 
-void
-z_vfdprintf(int fd, const char *fmt, va_list ap)
+void z_vfdprintf(int fd, const char *fmt, va_list ap)
 {
 	kdoprnt(fd, fmt, ap);
 }
@@ -82,20 +81,24 @@ kdoprnt(int fd, const char *fmt, va_list ap)
 	char *p;
 	static int init;
 
-	if (!init) {
+	if (!init)
+	{
 		outptr = outbuf;
 		init = 1;
 	}
 
-	for (;;) {
-		while ((ch = *fmt++) != '%') {
+	for (;;)
+	{
+		while ((ch = *fmt++) != '%')
+		{
 			if (ch == '\0')
 				return;
 			putcharfd(ch, fd);
 		}
 		lflag = 0;
-reswitch:
-		switch (ch = *fmt++) {
+	reswitch:
+		switch (ch = *fmt++)
+		{
 		case 'l':
 			lflag = 1;
 			goto reswitch;
@@ -110,7 +113,8 @@ reswitch:
 			break;
 		case 'd':
 			ul = lflag ? va_arg(ap, long) : va_arg(ap, int);
-			if ((long)ul < 0) {
+			if ((long)ul < 0)
+			{
 				putcharfd('-', fd);
 				ul = -(long)ul;
 			}
@@ -127,7 +131,7 @@ reswitch:
 		case 'p':
 			putcharfd('0', fd);
 			putcharfd('x', fd);
-			lflag += sizeof(void *)==sizeof(unsigned long)? 1 : 0;
+			lflag += sizeof(void *) == sizeof(unsigned long) ? 1 : 0;
 			/* FALLTHRU */
 		case 'x':
 			ul = lflag ? va_arg(ap, unsigned long) : va_arg(ap, unsigned int);
@@ -142,7 +146,8 @@ reswitch:
 				l = (sizeof(unsigned long) * 8) - 4;
 			else
 				l = (sizeof(unsigned int) * 8) - 4;
-			while (l >= 0) {
+			while (l >= 0)
+			{
 				putcharfd("0123456789abcdef"[(ul >> l) & 0xf], fd);
 				l -= 4;
 			}
@@ -161,14 +166,42 @@ reswitch:
 static void
 kprintn(int fd, unsigned long ul, int base)
 {
-	/* hold a long in base 8 */
-	char *p, buf[(sizeof(long) * 8 / 3) + 1];
+	// rewrote to avoid div
+	char buf[(sizeof(long) * 8 / 3) + 1], *p = buf;
+	const char *digits = "0123456789abcdef";
+	if (ul == 0)
+	{
+		*p++ = '0';
+	}
+	else
+	{
+		while (ul)
+		{
+			unsigned long q = 0, x = ul, d = base, shift = 1;
+			// scale divisor up
+			while ((d << 1) > d && (d << 1) <= x)
+			{
+				d <<= 1;
+				shift <<= 1;
+			}
+			// long division by shifts/subtractions
+			while (shift)
+			{
+				if (x >= d)
+				{
+					x -= d;
+					q += shift;
+				}
+				d >>= 1;
+				shift >>= 1;
+			}
+			*p++ = digits[x]; // x is remainder
+			ul = q;
+		}
+	}
 
-	p = buf;
-	do {
-		*p++ = "0123456789abcdef"[ul % base];
-	} while (ul /= base);
-	do {
+	do
+	{
 		putcharfd(*--p, fd);
 	} while (p > buf);
 }
