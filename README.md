@@ -1,4 +1,4 @@
-# ELF loader
+# Encrypted ELF loader
 
 A small elf loader. It can load static and dynamically linked ELF EXEC and DYN (pie) binaries. The loader is PIE program that doesn't depend on libc and calls kernel services directly (z_syscall.c).
 
