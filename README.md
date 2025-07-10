@@ -1,10 +1,10 @@
 # Encrypted ELF packer
 
-A small elf packer/loader. It can load static and dynamically linked ELF EXEC and DYN (pie) binaries. The loader is PIE program that doesn't depend on libc and calls kernel services directly (z_syscall.c).
+A small elf packer/loader. Base on [MikhailProg/elf](https://github.com/MikhailProg/elf). It can load static and dynamically linked ELF EXEC and DYN (pie) binaries. The loader is PIE program that doesn't depend on libc and calls kernel services directly (z_syscall.c).
 
 If the loader needs to load a dynamically linked ELF it places an interpreter (usually ld.so) and a requested binary into a memory and then calls the interpreter entry point.
 
-This branch adds the aes implementation from: [tiny-AES-c](https://github.com/kokke/tiny-AES-c/)
+This fork adds the AES implementation from: [tiny-AES-c](https://github.com/kokke/tiny-AES-c/)
 
 The IV will be generated on each build, so no two binaries will have the same IV.
 
