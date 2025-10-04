@@ -187,7 +187,7 @@ void z_entry(unsigned long *sp, void (*fini)(void))
 			AVSET(AT_PHNUM, av, ehdrs[Z_PROG].e_phnum);
 			AVSET(AT_PHENT, av, ehdrs[Z_PROG].e_phentsize);
 			AVSET(AT_ENTRY, av, entry[Z_PROG]);
-			AVSET(AT_EXECFN, av, (unsigned long)argv[1]);
+			AVSET(AT_EXECFN, av, (unsigned long)argv[0]);
 			AVSET(AT_BASE, av, elf_interp ? base[Z_INTERP] : av->a_un.a_val);
 		}
 		++av;
